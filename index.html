@@ -135,8 +135,8 @@
 				// hexagonos ======================================================
 				var hex_radius = 15;
 				var num_vertex = 6;
-				var pos_init_x = -100;
-				var pos_init_y = -100;
+				var pos_init_x = -80;
+				var pos_init_y = 80;
 
 				createHexagonGrid(scene, 7, 7, hex_radius, pos_init_y, pos_init_x);
 				// =================================================
@@ -222,9 +222,9 @@
 			function render() {
 
 				// theta += 0.1;
-				camera.position.y = 75;
-				camera.position.z = 1000;
-				camera.lookAt( new THREE.Vector3(0,75,0) );
+				camera.position.y = 0;
+				camera.position.z = 100;
+				camera.lookAt( new THREE.Vector3(0,0,0) );
 
 				camera.updateMatrixWorld();
 
