@@ -68,24 +68,18 @@
 			init();
 			animate();
 
-			function createHexagon()
+			function createHexagon(hex_radius, num_vertex)
 			{
 				var haxagonShape = new THREE.Shape();
-				var hex_radius = 10;
-
-
-				x = hex_radius*Math.cos((Math.PI*0)/6);
-				y = hex_radius*Math.sin((Math.PI*0)/6);
-				haxagonShape.moveTo(  x, y );
-
-				for(var i = 1; i <= 6; i++)
+				x = hex_radius*Math.cos((Math.PI*0)/num_vertex);
+				y = hex_radius*Math.sin((Math.PI*0)/num_vertex);
+				haxagonShape.moveTo( x, y );
+				for(var i = 1; i <= num_vertex; i++)
 				{
-					x = hex_radius*Math.cos((2*Math.PI*i)/6);
-					y = hex_radius*Math.sin((2*Math.PI*i)/6);
+					x = hex_radius*Math.cos((2*Math.PI*i)/num_vertex);
+					y = hex_radius*Math.sin((2*Math.PI*i)/num_vertex);
 					haxagonShape.lineTo( x,y );
 				}
-
-				// solid line
 
 				var geometry = new THREE.ShapeGeometry( haxagonShape );
 				var material = new THREE.MeshLambertMaterial( { 
@@ -94,9 +88,35 @@
 					opacity: 0.25
 				} );
 				var poligono = new THREE.Mesh( geometry,  material);
-				poligono.rotation.set( 0, 0, 0 );
+				poligono.rotation.set( 0, 0, Math.PI/2 );
 				poligono.scale.set( 1, 1, 1 );
 				return poligono;
+			}
+
+			function createHexagonRow(scene, cols, hex_radius, init_y, init_x)
+			{
+				var num_vertex = 6;
+				var distance = hex_radius/**Math.cos(Math.PI/num_vertex)*/;
+				var dist_x = 2*distance*Math.cos((Math.PI)/num_vertex);
+				for(var i = 0; i < cols; i++)
+				{
+					posx = dist_x*i;
+					var poligono = createHexagon(hex_radius, num_vertex);
+					poligono.position.set( init_x + posx, init_y, 0 );
+					scene.add( poligono );
+				}
+			}
+
+			function createHexagonGrid(scene, rows, cols, hex_radius, init_y, init_x)
+			{
+				var num_vertex = 6;
+				var dist_y = hex_radius + (hex_radius*Math.sin((Math.PI)/num_vertex));
+				var dist_x = hex_radius*Math.cos((Math.PI)/num_vertex);
+				for(var i = 0; i < rows; i++)
+				{
+					pox = (i%2)*dist_x;
+					createHexagonRow(scene, cols, hex_radius, init_y - (i*dist_y), init_x + pox);	
+				}
 			}
 
 			function init() {
@@ -113,41 +133,12 @@
 				scene.add( light );
 
 				// hexagonos ======================================================
-				var hex_radius = 10;
-				var distance = Math.sqrt( Math.pow(hex_radius,2) - Math.pow(hex_radius/2,2) );
-				var poligono = createHexagon();
-				poligono.position.set( 0, 100, 0 );
-				scene.add( poligono );
+				var hex_radius = 15;
+				var num_vertex = 6;
+				var pos_init_x = -100;
+				var pos_init_y = -100;
 
-				first_x = 2*distance*Math.cos((Math.PI*1)/6);
-				first_y = 2*distance*Math.sin((Math.PI*1)/6);
-				var poligono2 = createHexagon();
-				poligono2.position.set( first_x, 
-										first_y + 100, 
-										0 );
-				scene.add( poligono2 );
-
-				prev_x = first_x + first_x;
-				var poligono2 = createHexagon();
-				poligono2.position.set( prev_x, 
-										100, 
-										0 );
-				scene.add( poligono2 );
-
-				prev_x = first_x + prev_x;
-				var poligono2 = createHexagon();
-				poligono2.position.set( prev_x, 
-										first_y +100, 
-										0 );
-				scene.add( poligono2 );
-
-				prev_x = prev_x + first_x;
-				var poligono2 = createHexagon();
-				poligono2.position.set( prev_x, 
-										100, 
-										0 );
-				scene.add( poligono2 );
-
+				createHexagonGrid(scene, 7, 7, hex_radius, pos_init_y, pos_init_x);
 				// =================================================
 
 				raycaster = new THREE.Raycaster();
@@ -230,9 +221,9 @@
 
 			function render() {
 
-				theta += 0.1;
+				// theta += 0.1;
 				camera.position.y = 75;
-				camera.position.z = 100;
+				camera.position.z = 1000;
 				camera.lookAt( new THREE.Vector3(0,75,0) );
 
 				camera.updateMatrixWorld();
