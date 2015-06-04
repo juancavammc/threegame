@@ -51,6 +51,12 @@
 		<script src="js/controls/MouseControls.js"></script>
 		<script src="js/effects/VREffect.js"></script>
 		<script src="js/controls/VRControls.js"></script>
+
+		<script src="js/loaders/OBJLoader.js"></script>
+		<script src="js/loaders/DDSLoader.js"></script>
+		<script src="js/loaders/MTLLoader.js"></script>
+		<script src="js/loaders/OBJMTLLoader.js"></script>
+
 		<script src="js/libs/stats.min.js"></script>
 
 		<script>
@@ -61,6 +67,8 @@
 			var vrControls;
 			var mouseControls;
 			var headControls;
+
+			var goodie;
 
 			var mouse = new THREE.Vector2(), INTERSECTED;
 			var radius = 100, theta = 0;
@@ -73,12 +81,12 @@
 				var haxagonShape = new THREE.Shape();
 				x = hex_radius*Math.cos((Math.PI*0)/num_vertex);
 				y = hex_radius*Math.sin((Math.PI*0)/num_vertex);
-				haxagonShape.moveTo( x, y );
+				haxagonShape.moveTo( x,y );
 				for(var i = 1; i <= num_vertex; i++)
 				{
 					x = hex_radius*Math.cos((2*Math.PI*i)/num_vertex);
 					y = hex_radius*Math.sin((2*Math.PI*i)/num_vertex);
-					haxagonShape.lineTo( x,y );
+					haxagonShape.lineTo( x, y );
 				}
 
 				var geometry = new THREE.ShapeGeometry( haxagonShape );
@@ -119,26 +127,55 @@
 				}
 			}
 
+
+
 			function init() {
 
 				container = document.createElement( 'div' );
 				document.body.appendChild( container );
 
 				camera = new THREE.PerspectiveCamera( 100, window.innerWidth / window.innerHeight, 1, 10000 );
-
+				camera = new THREE.OrthographicCamera( 1, 1, 1, 1, 1, 1 );
 				scene = new THREE.Scene();
 
-				var light = new THREE.DirectionalLight( 0xffffff, 1 );
+				var ambientLight = new THREE.AmbientLight( 0x555555 );
+				scene.add( ambientLight );
+
+				var light = new THREE.DirectionalLight( 0x666666, 1 );
 				light.position.set( 1, 1, 1 ).normalize();
 				scene.add( light );
 
-				// hexagonos ======================================================
+				// hexagonos =============================================
 				var hex_radius = 15;
 				var num_vertex = 6;
 				var pos_init_x = -80;
 				var pos_init_y = 80;
 
 				createHexagonGrid(scene, 7, 7, hex_radius, pos_init_y, pos_init_x);
+
+				// modelo ================================================
+				var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
+
+				var onError = function ( xhr ) {};
+
+				var objmtlloader = new THREE.OBJMTLLoader();
+				objmtlloader.load( 	'assets/guardian/test.obj', 
+									'assets/guardian/test.mtl',
+									function ( object ) 
+				{
+					object.position.x = 80;
+					object.position.y = 0;
+					object.position.z = 0;
+					object.rotation.set( Math.PI/2, 0, 0 );
+					object.scale.x = object.scale.y = object.scale.z = 5;
+
+					scene.add( object );
+				}, onProgress, onError );
 				// =================================================
 
 				raycaster = new THREE.Raycaster();
@@ -219,8 +256,8 @@
 
 			}
 
-			function render() {
-
+			function render() 
+			{
 				// theta += 0.1;
 				camera.position.y = 0;
 				camera.position.z = 100;
@@ -259,6 +296,8 @@
 					}
 					INTERSECTED = null;
 				}
+
+
 
 				headControls.update();
 				vrEffect.render( scene, camera );
